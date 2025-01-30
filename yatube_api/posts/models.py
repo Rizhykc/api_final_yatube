@@ -79,7 +79,7 @@ class Comment(models.Model):
 
 
 class Follow(models.Model):
-    follower = models.ForeignKey(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         verbose_name='Подписчик',
@@ -97,4 +97,4 @@ class Follow(models.Model):
         verbose_name_plural = 'Подписки'
 
     def __str__(self):
-        return (f'{self.follower} подписан на {self.following}')
+        return (f'{self.user} подписан на {self.following}')
