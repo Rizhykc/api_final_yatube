@@ -49,7 +49,7 @@ class FollowViewSet(viewsets.ModelViewSet):
     serializer_class = FollowSerializer
     filter_backends = (SearchFilter,)
     search_fields = ('user__username', 'following__username')
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
 
     def get_queryset(self):
         return self.request.user.follower.all()
