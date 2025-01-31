@@ -39,25 +39,18 @@ class FollowSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Follow."""
 
     user = serializers.SlugRelatedField(
-        read_only=True,
         slug_field='username',
-        default=serializers.CurrentUserDefault()
+        read_only=True,
+        default=serializers.CurrentUserDefault(),
     )
     following = serializers.SlugRelatedField(
         slug_field='username',
-        queryset=User.objects.all()
+        queryset=User.objects.all(),
     )
 
-    def validate(self, data):
-        if data['user'] == data['following']:
-            raise serializers.ValidationError(
-                'Нельзя подписаться на самого себя!'
-            )
-        return data
-
     class Meta:
-        Model = Follow()
-        fields = ('id', 'follower', 'following')
+        fields = ('id', 'user', 'following')
+        model = Follow
         validators = (
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
@@ -65,3 +58,10 @@ class FollowSerializer(serializers.ModelSerializer):
                 message=('Подписка на автора оформлена ранее!')
             ),
         )
+
+    def validate(self, data):
+        if self.context['request'].user == data['following']:
+            raise serializers.ValidationError(
+                'Нельзя подписаться на самого себя'
+            )
+        return data
