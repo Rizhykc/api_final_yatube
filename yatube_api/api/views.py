@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (IsAuthenticated,
@@ -32,20 +32,22 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly,
                           AuthorExclusiveEditReadOnly]
 
-    def get_post_or_none(self):
+    def get_post(self):
         post_id = self.kwargs.get('post_id')
         return get_object_or_404(Post, id=post_id)
 
     def get_queryset(self):
-        post = self.get_post_or_none()
+        post = self.get_post()
         return post.comments.all().select_related('author')
 
     def perform_create(self, serializer):
-        post = self.get_post_or_none()
+        post = self.get_post()
         serializer.save(author=self.request.user, post=post)
 
 
-class FollowViewSet(viewsets.ModelViewSet):
+class FollowViewSet(mixins.CreateModelMixin,
+                    mixins.ListModelMixin,
+                    viewsets.GenericViewSet):
     serializer_class = FollowSerializer
     filter_backends = (SearchFilter,)
     search_fields = ('user__username', 'following__username')
